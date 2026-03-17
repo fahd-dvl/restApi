@@ -3,6 +3,7 @@ package com.demo.restapi.services;
 import com.demo.restapi.dtos.ProductFullDTO;
 import com.demo.restapi.dtos.ProductPreviewDTO;
 import com.demo.restapi.entities.Product;
+import com.demo.restapi.entities.Seller;
 import com.demo.restapi.mappers.ProductMapper;
 import com.demo.restapi.repositories.ProductRepository;
 import com.demo.restapi.repositories.SellerRepository;
@@ -10,6 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +35,19 @@ public class ProductService {
 
     // 2. Create
     public ProductFullDTO createProduct(Product product) {
+        if (product.getSeller() == null) {
+            throw new RuntimeException("Seller info is missing in the request body");
+        }
+
+        String sellerId = product.getSeller().getId();
+        if (sellerId == null) {
+            throw new RuntimeException("Seller ID must be provided");
+        }
+        Seller realSeller = sellerRepository.findById(product.getSeller().getId())
+                .orElseThrow(() -> new RuntimeException("Seller not found"));
+
+        // 2. Attach that full Seller to the Product
+        product.setSeller(realSeller);
         // The repository saves the entity and returns the saved version with the ID
         Product savedProduct = productRepository.save(product);
 
@@ -75,6 +91,21 @@ public class ProductService {
         Product updatedProduct = productRepository.save(existingProduct);
         return ProductMapper.toFullDTO(updatedProduct);
     }
+
+
+
+    public List<ProductFullDTO> getProductsByCategory(String category) {
+        List<Product> products = productRepository.findByCategory(category);
+
+        // Optional: Throw an error or log if nothing is found
+        if (products.isEmpty()) {
+            System.out.println("No products found for category: " + category);
+        }
+        return products.stream()
+                .map(ProductMapper::toFullDTO)
+                .toList();
+    }
+
 
 
 

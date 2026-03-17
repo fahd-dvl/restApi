@@ -1,6 +1,8 @@
 package com.demo.restapi.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
@@ -49,8 +51,9 @@ public class Product {
     @Column(updatable=false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="seller_id")
+    @JsonBackReference
     private Seller seller;
 
     @PrePersist

@@ -46,4 +46,9 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/category")
+    public List<ProductFullDTO> getByCategory(@RequestParam String category){
+        return productService.getProductsByCategory(category);
+    }
 }
