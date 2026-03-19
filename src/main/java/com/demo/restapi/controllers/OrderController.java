@@ -20,36 +20,39 @@ public class OrderController {
     private final OrderService orderService;
 
     // 1. Get List
-    @GetMapping
+    @GetMapping(headers = "X-API-VERSION=1")
     public List<Order> getAll() {
         return orderService.getAllOrders();
     }
 
     // 2. Get by Product ID
-    @GetMapping("/product/{productId}")
+    @GetMapping(value = "/product/{productId}", headers = "X-API-VERSION=1")
     public List<Order> getByProduct(@PathVariable String productId) {
         return orderService.getOrdersByProductId(productId);
     }
     // 3. Get by Customer Name
-    @GetMapping("/customer/{name}")
+    @GetMapping(value = "/customer/{name}",headers = "X-API-VERSION=1" )
+
     public List<Order> getByCustomer(@PathVariable String name) {
         return orderService.getOrdersByCustomer(name);
     }
 
     // 4. Create Order
-    @PostMapping
+    @PostMapping(headers = "X-API-VERSION=1")
     @ResponseStatus(HttpStatus.CREATED)
     public Order create(@Valid @RequestBody Order order) {
         return orderService.createOrder(order);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", headers = "X-API-VERSION=1")
+
     public Order updateStatus(@PathVariable String id, @RequestParam OrderStatus status) {
         return orderService.updateStatus(id, status);
     }
 
     // 6. Delete
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/{id}", headers = "X-API-VERSION=1")
+
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable String id) {
         orderService.deleteOrder(id);
