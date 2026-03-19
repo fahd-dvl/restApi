@@ -8,6 +8,8 @@ import com.demo.restapi.mappers.SellerMapper;
 import com.demo.restapi.repositories.SellerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,11 +21,9 @@ public class SellerService {
     private final SellerRepository sellerRepository;
 
     // 1. Get List
-    public List<SellerPreviewDTO> getAllSellers() {
-        return sellerRepository.findAll()
-                .stream()
-                .map(SellerMapper::toPreviewDTO)
-                .toList();
+    public Page<SellerPreviewDTO> getAllSellers(Pageable pageable) {
+        return sellerRepository.findAll(pageable)
+                .map(SellerMapper::toPreviewDTO);
     }
 
     // 2. Get By ID

@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,8 +26,9 @@ public class SellerController {
 
     // 1. Get List (Returns Preview DTOs for a lighter response)
     @GetMapping
-    public ResponseEntity<List<SellerPreviewDTO>> getAll() {
-        return ResponseEntity.ok(sellerService.getAllSellers());
+    public ResponseEntity<Page<SellerPreviewDTO>> getAllSellers(Pageable pageable) {
+        Page<SellerPreviewDTO> sellers = sellerService.getAllSellers(pageable);
+        return ResponseEntity.ok(sellers);
     }
 
     // 2. Get By ID
