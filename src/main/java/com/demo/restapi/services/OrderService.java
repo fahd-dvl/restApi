@@ -3,6 +3,7 @@ package com.demo.restapi.services;
 import com.demo.restapi.entities.Order;
 import com.demo.restapi.entities.OrderStatus;
 import com.demo.restapi.entities.Product;
+import com.demo.restapi.exceptions.ResourceNotFoundException;
 import com.demo.restapi.repositories.OrderRepository;
 import com.demo.restapi.repositories.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -42,7 +43,7 @@ public class OrderService {
 
         for (Product p : order.getProducts()) {
             Product managedProduct = productRepository.findById(p.getId())
-                    .orElseThrow(() -> new RuntimeException("Product not found: " + p.getId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + p.getId()));
             total += managedProduct.getPrice();
             managedProducts.add(managedProduct);
         }
@@ -58,7 +59,7 @@ public class OrderService {
     @Transactional
     public Order updateStatus(String id, OrderStatus newStatus) {
         Order existingOrder = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         existingOrder.setOrderStatus(newStatus);
         return orderRepository.save(existingOrder);
@@ -69,7 +70,7 @@ public class OrderService {
         if (orderRepository.existsById(id)) {
             orderRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Order not found with id: " + id);
+            throw new ResourceNotFoundException("Order not found with id: " + id);
         }
     }
 

@@ -29,7 +29,9 @@ public class Seller {
     @NotBlank
     private String storeName;
 
-    @Email
+    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email address")
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String phone;

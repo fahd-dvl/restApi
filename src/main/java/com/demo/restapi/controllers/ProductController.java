@@ -4,9 +4,12 @@ import com.demo.restapi.dtos.ProductFullDTO;
 import com.demo.restapi.dtos.ProductPreviewDTO;
 import com.demo.restapi.entities.Product;
 import com.demo.restapi.services.ProductService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
+@Validated
 public class ProductController {
 
     private final ProductService productService;
@@ -30,13 +34,13 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductFullDTO create(@RequestBody Product product) {
+    public ProductFullDTO create(@Valid @RequestBody Product product) {
         return productService.createProduct(product);
     }
 
     @PatchMapping("/{id}")
     public ProductFullDTO update(@PathVariable String id,
-                                 @RequestParam Double price,
+                                 @Positive @RequestParam Double price,
                                  @RequestParam Integer stock) {
         return productService.updateProduct(id, price, stock);
     }

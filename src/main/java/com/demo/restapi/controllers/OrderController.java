@@ -3,8 +3,11 @@ package com.demo.restapi.controllers;
 import com.demo.restapi.entities.Order;
 import com.demo.restapi.entities.OrderStatus;
 import com.demo.restapi.services.OrderService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
+@Validated
 public class OrderController {
     private final OrderService orderService;
 
@@ -35,7 +39,7 @@ public class OrderController {
     // 4. Create Order
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Order create(@RequestBody Order order) {
+    public Order create(@Valid @RequestBody Order order) {
         return orderService.createOrder(order);
     }
 

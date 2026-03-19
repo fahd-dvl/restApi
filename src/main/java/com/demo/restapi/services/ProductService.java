@@ -4,12 +4,15 @@ import com.demo.restapi.dtos.ProductFullDTO;
 import com.demo.restapi.dtos.ProductPreviewDTO;
 import com.demo.restapi.entities.Product;
 import com.demo.restapi.entities.Seller;
+import com.demo.restapi.exceptions.BusinessLogicException;
+import com.demo.restapi.exceptions.ResourceNotFoundException;
 import com.demo.restapi.mappers.ProductMapper;
 import com.demo.restapi.repositories.ProductRepository;
 import com.demo.restapi.repositories.SellerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +30,7 @@ public class ProductService {
     // 1. Get By ID
     public ProductFullDTO getProductById(String id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         // Use our Mapper to return the DTO
         return ProductMapper.toFullDTO(product);
@@ -35,16 +38,11 @@ public class ProductService {
 
     // 2. Create
     public ProductFullDTO createProduct(Product product) {
-        if (product.getSeller() == null) {
-            throw new RuntimeException("Seller info is missing in the request body");
-        }
-
-        String sellerId = product.getSeller().getId();
-        if (sellerId == null) {
-            throw new RuntimeException("Seller ID must be provided");
+        if (product.getSeller() == null || product.getSeller().getId() == null) {
+            throw new BusinessLogicException("A valid Seller ID is required to create a product.");
         }
         Seller realSeller = sellerRepository.findById(product.getSeller().getId())
-                .orElseThrow(() -> new RuntimeException("Seller not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
 
         // 2. Attach that full Seller to the Product
         product.setSeller(realSeller);
@@ -60,7 +58,7 @@ public class ProductService {
     public void deleteProduct(String id) {
         // We check if it exists first so we can throw a clean error if it doesn't
         if (!productRepository.existsById(id)) {
-            throw new RuntimeException("Cannot delete: Product with id " + id + " does not exist.");
+            throw new ResourceNotFoundException("Cannot delete: Product with id " + id + " does not exist.");
         }
         productRepository.deleteById(id);
     }
@@ -79,7 +77,7 @@ public class ProductService {
     public ProductFullDTO updateProduct(String id, Double newPrice, Integer newStock) {
         // First, find the existing product
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         // Update only the permitted fields
         existingProduct.setPrice(newPrice);
