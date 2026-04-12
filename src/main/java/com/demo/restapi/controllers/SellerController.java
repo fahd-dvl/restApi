@@ -6,15 +6,18 @@ import com.demo.restapi.services.SellerService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/v1/sellers")
@@ -25,10 +28,22 @@ public class SellerController {
     private final SellerService sellerService;
 
     // 1. Get List (Returns Preview DTOs for a lighter response)
-    @GetMapping
-    public ResponseEntity<Page<SellerPreviewDTO>> getAllSellers(Pageable pageable) {
+    @GetMapping(produces = {
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.APPLICATION_XML_VALUE
+    })
+    public ResponseEntity<Page<SellerPreviewDTO>> getAllSellers(@ParameterObject Pageable pageable) {
         Page<SellerPreviewDTO> sellers = sellerService.getAllSellers(pageable);
-        return ResponseEntity.ok(sellers);
+
+        // 1. Define the caching policy (e.g., 1 hour)
+        CacheControl cacheControl = CacheControl.maxAge(60, TimeUnit.MINUTES)
+                .cachePublic()
+                .mustRevalidate();
+
+        // 2. Return the response with the Cache-Control header
+        return ResponseEntity.ok()
+                .cacheControl(cacheControl)
+                .body(sellers);
     }
 
     // 2. Get By ID
